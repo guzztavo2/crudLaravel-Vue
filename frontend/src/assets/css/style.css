@@ -1,0 +1,72 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Red Hat Text", sans-serif;
+  --vermelho_1: #a6192e;
+  --vermelho_2: #e63946;
+  --branco: #f1faee;
+  --azul: #47b2d6;
+  --azul_2: #093266;
+  --azul_3: #14253e;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--branco);
+}
+
+.flexRow {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.flexColumn {
+  display: flex;
+  flex-flow: column wrap;
+}
+
+.w100 {
+  width: 100%;
+}
+.w50 {
+  width: calc(100% / 2);
+}
+.container {
+  width: 100%;
+  max-width: 70%;
+  margin: 0 auto;
+  padding: 0 2%;
+}
+.w25 {
+  width: calc(100% / 3);
+}
+
+input {
+  width: 100%;
+  padding: 2% 1%;
+  margin: 1%;
+  font-size: 1vw;
+  border: 0;
+  outline: 0;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0.2vw 0.2vw 0.2vw;
+  transition: ease-in-out 0.2s;
+}
+p {
+  font-size: 1.1vw;
+}
+
+input:focus {
+  box-shadow: rgba(0, 0, 0, 0.788) 0.4vw 0.4vw 0.4vw;
+}
+@media (max-width: 1500px) {
+  input {
+    font-size: 18px;
+    padding: 2%;
+  }
+  p {
+    font-size: 18px;
+  }
+}
