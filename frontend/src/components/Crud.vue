@@ -1,4 +1,9 @@
 <template>
+  <dialogModal
+    v-if="openModal"
+    :typeModal="typeModal"
+    @resposta-modal="respostaModal"
+  ></dialogModal>
   <section class="crud">
     <div class="container">
       <h1>Gerenciar Informações</h1>
@@ -118,37 +123,46 @@ class infoData {
 }
 import { Vue, Options } from "vue-class-component";
 import Informacao from "./Informacao";
-import { tsImportEqualsDeclaration } from "@babel/types";
+import dialogModal from "./Elements/dialogModal.vue";
 @Options({
   async mounted() {
     await this.getInformacoes();
-   
   },
+  components: { dialogModal },
 
-  emits: ["exibirModal", "exibir-loading", "atualizarPagina"],
+  emits: ["exibir-modal", "exibir-loading", "atualizarPagina"],
 })
 export default class crud extends Vue {
   selecaoAtivada = false;
   listInformacoes: Array<infoData> = [];
   currentPage!: number;
+
   quantityPages!: number;
   resquestOrder: Array<string> = [];
+  
+  typeModal:any = [];
+  openModal = false;
+  respostaModal(item: any) {
+    if(item[0] == true){
+      //deletar informação!!!!
+    }
+    this.openModal = false;
+  }
 
-    
   orderByEvent() {
-    const elements = document.querySelectorAll("tr.head th[order]");    
+    const elements = document.querySelectorAll("tr.head th[order]");
     elements.forEach((element) => {
-      element.addEventListener('click', ()=>{
-         if (this.resquestOrder.length > 0) {
+      element.addEventListener("click", () => {
+        if (this.resquestOrder.length > 0) {
           if (this.resquestOrder[1] == "desc") this.resquestOrder[1] = "asc";
           else this.resquestOrder[1] = "desc";
-          this.resquestOrder[0] = element.getAttribute('order')||'';
+          this.resquestOrder[0] = element.getAttribute("order") || "";
         } else {
-          this.resquestOrder[0] = element.getAttribute('order')||'';
+          this.resquestOrder[0] = element.getAttribute("order") || "";
           this.resquestOrder[1] = "desc";
         }
         this.getInformacoes();
-      })
+      });
     });
 
     // this.getInformacoes();
@@ -217,10 +231,10 @@ export default class crud extends Vue {
             <td><p>${item.nomeUsuario}</p></td>
             <td>
               <p class="flexRow">
-                <i class="fa-solid fa-minus">
+                <i id="deletarItem" class="fa-solid fa-minus">
                   <span>Remover</span>
                 </i>
-                <i class="fa-solid fa-pen-to-square">
+                <i id="editarItem" class="fa-solid fa-pen-to-square">
                   <span>Editar</span>
                 </i>
               </p>
@@ -238,8 +252,24 @@ export default class crud extends Vue {
     };
     this.orderByEvent();
     atualizarInformacaoEvent(document.querySelectorAll("#informacaoRow"));
+    this.deletarEditarEvents();
   }
-
+  deletarEditarEvents() {
+    document.querySelectorAll("#deletarItem").forEach((item) => {
+      item.addEventListener("click", () => {
+        const element = item.parentElement?.parentElement?.parentElement?.getAttribute('identificador')
+        this.typeModal =['deletar', element];
+        this.openModal = true;
+      });
+    });
+    document.querySelectorAll("#editarItem").forEach((item) => {
+      item.addEventListener("click", () => {
+        const element = item.parentElement?.parentElement?.parentElement?.getAttribute('identificador')
+        this.typeModal =['visualizar', element];
+        this.openModal = true;
+      });
+    });
+  }
   adicionarPaginacao() {
     const paginacao = this.$refs.paginacao as HTMLElement,
       currentEvent = this.setCurrentPage,

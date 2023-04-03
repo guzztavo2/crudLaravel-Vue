@@ -106,7 +106,6 @@ export default class App extends Vue implements AppData, modalProps {
     this.$nextTick(() => {
       this.typeModal = typeModal;
       const modal: any = this.$refs.modal;
-      console.log(modal);
       this.titleModal = titleModal;
       this.messageModal = messageModal;
 

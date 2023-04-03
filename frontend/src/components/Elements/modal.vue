@@ -43,7 +43,7 @@ import vClickOutside from "click-outside-vue3";
   directives: {
     clickOutside: vClickOutside.directive,
   },
-  emits:['fechar-modal'],
+  emits: ["fechar-modal"],
   props: {
     typeModal: {
       type: Boolean,
@@ -61,17 +61,19 @@ export default class ModalApp extends Vue {
   }
 
   fecharModal(event: Event) {
-    const localName = (event.target as HTMLElement).localName;
-    if (
-      document.querySelector("#modal")?.classList.contains("dNone") ||
-      localName == "a" || localName == 'li'
-    )
-      return;
-
+    if (event !== null && event !== undefined) {
+      const localName = (event.target as HTMLElement).localName;
+      if (
+        document.querySelector("#modal")?.classList.contains("dNone") ||
+        localName == "a" ||
+        localName == "li"
+      )
+        return;
+    }
     this.modalClassOpenClose = "slide-out-top-Message";
-      setTimeout(() => {
-        this.$emit('fechar-modal');
-      }, 500);
+    setTimeout(() => {
+      this.$emit("fechar-modal");
+    }, 500);
   }
 }
 </script>
@@ -92,7 +94,10 @@ div.message.error div.text__wrapper {
 div.message.success {
   background-color: #0931669d;
 }
-
+div.text__wrapper{
+  max-height: 400px;
+  overflow:auto;
+}
 div.message.success div.title__wrapper {
   background-color: var(--azul_2);
 }
