@@ -43,6 +43,7 @@ import vClickOutside from "click-outside-vue3";
   directives: {
     clickOutside: vClickOutside.directive,
   },
+  emits:['fechar-modal'],
   props: {
     typeModal: {
       type: Boolean,
@@ -51,7 +52,7 @@ import vClickOutside from "click-outside-vue3";
   },
 })
 export default class ModalApp extends Vue {
-  modalClassOpenClose = "dNone";
+  modalClassOpenClose = "";
 
   typeModal!: boolean;
 
@@ -68,9 +69,9 @@ export default class ModalApp extends Vue {
       return;
 
     this.modalClassOpenClose = "slide-out-top-Message";
-    setTimeout(() => {
-      this.modalClassOpenClose = "dNone";
-    }, 500);
+      setTimeout(() => {
+        this.$emit('fechar-modal');
+      }, 500);
   }
 }
 </script>

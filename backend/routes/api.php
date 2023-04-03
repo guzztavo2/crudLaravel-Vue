@@ -30,6 +30,6 @@ Route::controller(userController::class)->middleware(['auth:sanctum', HandleCors
     Route::post('/trocarSenha', 'trocarSenha');
     Route::post('/trocarNomeUsuario', 'trocarNomeUsuario');
 });
-Route::controller(informacaoController::class)->middleware(['auth:sanctum', HandleCors::class])->group(function () {
-
+Route::controller(informacaoController::class)->middleware([HandleCors::class])->group(function () {
+    Route::get('/informacao', 'informacao');
 });

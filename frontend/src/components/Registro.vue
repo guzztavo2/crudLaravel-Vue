@@ -60,7 +60,7 @@ import ModalApp from "./Elements/modal.vue";
 import User from "./User";
 
 @Options({
-  emits: ["atualizar-pagina", "exibir-modal"],
+  emits: ["atualizar-pagina", "exibir-modal", "exibir-loading"],
   data() {
     return {
       nomeUsuario: "guzztavo2",
@@ -138,19 +138,17 @@ export default class Registro extends Vue {
       document.querySelector("#nomeUsuario").style.opacity = opacityStr;
     };
     styleNomeUsuario("40%");
-
+    this.$emit("exibir-loading", true);
     const response = await User.verificarNomeUsuario(this.nomeUsuario);
     if (response[0] == "false") {
       errorElement!.innerHTML = response[1];
       styleNomeUsuario("100%");
-
-      return;
-    }else{
+    } else {
       errorElement!.innerHTML = "";
       styleNomeUsuario("100%");
-
     }
-
+    this.$emit("exibir-loading", false);
+    return;
   }
   async submitRegistroFromAxios() {
     this.validarNomeUsuario();
@@ -187,9 +185,10 @@ export default class Registro extends Vue {
         opacityStr;
     };
     inputOpacity("55%");
+    this.$emit("exibir-loading", true);
 
-    User.registrarUsuario(this.nomeUsuario, this.senhaUsuario).then(
-      (response) => {
+    User.registrarUsuario(this.nomeUsuario, this.senhaUsuario)
+      .then((response) => {
         inputOpacity("100%");
         if (response[0] == false) {
           this.$emit(
@@ -210,8 +209,10 @@ export default class Registro extends Vue {
               "!<br />Você foi registrado com sucesso!<br />Automaticamente será redirecionado para a pagina de login."
           );
         }
-      }
-    );
+      })
+      .finally(() => {
+        this.$emit("exibir-loading", false);
+      });
   }
 }
 </script>

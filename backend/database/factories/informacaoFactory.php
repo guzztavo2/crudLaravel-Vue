@@ -17,7 +17,8 @@ class informacaoFactory extends Factory
     public function definition(): array
     {
         return [
-            'informacao' => fake()->text()
+            'informacao' => fake()->text(),
+            'isDeleted' => true
         ];
     }
 }

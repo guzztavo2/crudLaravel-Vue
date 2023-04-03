@@ -1,5 +1,11 @@
 <template>
-  <modalApp ref="modal" :typeModal="typeModal">
+  <loadingComp v-if="openLoading"></loadingComp>
+  <modalApp
+    v-if="openModal"
+    ref="modal"
+    @fechar-modal="fecharModal"
+    :typeModal="typeModal"
+  >
     <template #modalTitle>
       <h3 v-html="titleModal"></h3>
     </template>
@@ -8,12 +14,14 @@
     </template>
   </modalApp>
   <headerApp
+
     :currentPage="currentPage"
     @atualizar-pagina="atualizarPagina"
     @exibir-modal="dispararModal"
   ></headerApp>
   <component
     :is="currentPage"
+    @exibir-loading="exibirLoading"
     @exibir-modal="dispararModal"
     @atualizar-pagina="atualizarPagina"
   ></component>
@@ -33,6 +41,7 @@ import trocarSenha from "./components/trocarSenha.vue";
 import User from "./components/User";
 import crud from "./components/Crud.vue";
 import trocarNomeUsuario from "./components/trocarNomeUsuario.vue";
+import loadingComp from "./components/Elements/loading.vue";
 interface AppData {
   currentPage: string;
 }
@@ -41,6 +50,7 @@ interface modalProps {
   titleModal: string;
   messageModal: string;
   typeModal: boolean;
+  openModal: boolean;
   dispararModal(
     typeModal: boolean,
     titleModal: string,
@@ -59,6 +69,7 @@ interface modalProps {
     PainelApp,
     trocarNomeUsuario,
     crud,
+    loadingComp,
   },
   methods: {},
   updated() {
@@ -69,44 +80,60 @@ interface modalProps {
   },
   mounted() {
     this.verificarUsuario();
-
   },
 })
 export default class App extends Vue implements AppData, modalProps {
+  // *** Props para abrir e definir o Estilo do Modal ***
   titleModal = "";
   messageModal = "";
   typeModal = true;
+  openModal = false;
+  // *****
+  // Props abrir a página de carregamento da aplicação
+  openLoading = false;
 
+  exibirLoading(valor:boolean){
+    this.openLoading = valor;
+  }
+  // ******
   publicPages = ["home", "registro", "login"];
   dispararModal(
     typeModal: boolean,
     titleModal: string,
     messageModal: string
   ): void {
-    this.typeModal = typeModal;
-    const modal: any = this.$refs.modal;
-    this.titleModal = titleModal;
-    this.messageModal = messageModal;
-    modal.exibirModal();
+    this.openModal = true;
+    this.$nextTick(() => {
+      this.typeModal = typeModal;
+      const modal: any = this.$refs.modal;
+      console.log(modal);
+      this.titleModal = titleModal;
+      this.messageModal = messageModal;
+
+      modal.exibirModal();
+    });
+  }
+
+  fecharModal() {
+    this.openModal = false;
   }
   currentPage = "crud";
   atualizarPagina(novaPagina: string) {
-    if(User.verificarLogado() == false){
-      if(this.publicPages.includes(novaPagina)){
+    if (User.verificarLogado() == false) {
+      if (this.publicPages.includes(novaPagina)) {
         this.currentPage = novaPagina;
         return;
       }
-    }else{
+    } else {
       this.currentPage = novaPagina;
       return;
     }
     this.dispararModal(
-        false,
-        "Ops, falha de navegação!",
-        "Verificamos que você não pode continuar logado, pois sua conta foi acessada em outra sessão/dispositivo."
-      );
-      this.atualizarPagina("home");
-    
+      false,
+      "Ops, falha de navegação!",
+      "Verificamos que você não pode continuar logado, pois sua conta foi acessada em outra sessão/dispositivo."
+    );
+    this.atualizarPagina("home");
   }
   async verificarUsuario() {
     const response = await User.verificarUsuario();

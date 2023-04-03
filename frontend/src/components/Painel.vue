@@ -36,7 +36,12 @@
 import { Options, Vue } from "vue-class-component";
 import User from "./User";
 @Options({
-  emits: ["atualizar-pagina", "exibir-modal", "verificar-usuario"],
+  emits: [
+    "atualizar-pagina",
+    "exibir-modal",
+    "verificar-usuario",
+    "exibir-loading",
+  ],
   components: {},
   props: {},
   mounted() {
@@ -46,11 +51,16 @@ import User from "./User";
 export default class PainelApp extends Vue {
   carregarNomeUsuario() {
     const ref = this.$refs.userName as HTMLElement;
+    this.$emit("exibir-loading", true);
     ref.classList.add("placeholder");
-    User.getUserName().then((response) => {
-      ref.innerHTML = "Seja bem vindo, " + response + ". O que fará hoje?";
-      ref.classList.remove("placeholder");
-    });
+    User.getUserName()
+      .then((response) => {
+        ref.innerHTML = "Seja bem vindo, " + response + ". O que fará hoje?";
+        ref.classList.remove("placeholder");
+      })
+      .finally(() => {
+        this.$emit("exibir-loading", false);
+      });
   }
 }
 </script>

@@ -41,7 +41,7 @@ import User from "./User";
 @Options({
   data() {
     return {
-      emits: ["atualizar-pagina", "exibir-modal"],
+      emits: ["atualizar-pagina", "exibir-modal",'exibir-loading'],
       nomeUsuario: {
         require: true,
         type: String,
@@ -155,6 +155,9 @@ export default class Login extends Vue {
       true,
       document.querySelector("div.loginForms button")
     );
+    this.$emit('exibir-loading', true);
+
+
 
     User.loginUser(this.nomeUsuario, this.senhaUsuario).then((response) => {
       if (response[0] == false) {
@@ -170,10 +173,12 @@ export default class Login extends Vue {
           "exibir-modal",
           true,
           "Acesso concebido!",
-          "Parabéns, você está logado em sua conta"
+          "Parabéns, você tem acesso em sua conta"
         );
-        console.log(User.getLocalStorage());
+        this.$emit('exibir-loading', false);
       }
+    }).finally(()=>{
+      this.$emit('exibir-loading', false);
     });
   }
 }

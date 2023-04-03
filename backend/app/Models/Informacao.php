@@ -38,5 +38,8 @@ class Informacao extends Model
     public function setInformacao(string $informacao){
         $this->informacao = $informacao;
     }
-
+    public static function listAllInformation(){
+        $Listinformacao = Informacao::where('isDeleted', '=', false)->get()->all();
+        return $Listinformacao;
+    }
 }
