@@ -1,10 +1,5 @@
 <template>
-  <ModalApp
-    v-if="typeModal[0] == 'deletar'"
-    ref="modal"
-    @fechar-modal="respostaClick(false)"
-    :typeModal="false"
-  >
+  <ModalApp v-if="typeModal[0] == 'deletar'" ref="modal" @fechar-modal="respostaClick(false)" :typeModal="false">
     <template #modalTitle>
       <h3>Você tem certeza que deseja deletar essa informação?</h3>
     </template>
@@ -19,12 +14,7 @@
       </h3>
     </template>
   </ModalApp>
-  <ModalApp
-    v-if="typeModal[0] == 'visualizar'"
-    ref="modal"
-    @fechar-modal="respostaClick(false)"
-    :typeModal="true"
-  >
+  <ModalApp v-if="typeModal[0] == 'visualizar'" ref="modal" @fechar-modal="respostaClick(false)" :typeModal="true">
     <template #modalTitle>
       <h3>Visualizar Informação:</h3>
     </template>
@@ -32,63 +22,31 @@
       <h3>
         <label for="id">
           ID:
-          <input
-            disabled
-            style="background-color: white; color: black"
-            type="text"
-            value="Informação"
-            id="id"
-          />
+          <input disabled style="background-color: white; color: black" type="text" value="Informação" id="id" />
         </label>
 
         <label for="informacao">
           Informação:
-          <input
-            style="background-color: white; color: black"
-            disabled
-            type="text"
-            id="informacao"
-          />
+          <input style="background-color: white; color: black" disabled type="text" id="informacao" />
         </label>
         <label for="quandoAtualizado">
           Atualizar:
-          <input
-            style="background-color: white; color: black"
-            disabled
-            type="text"
-            value="Informação"
-            id="quandoAtualizado"
-          />
+          <input style="background-color: white; color: black" disabled type="text" value="Informação"
+            id="quandoAtualizado" />
         </label>
         <label for="quandoCriado">
           Quando foi criado:
-          <input
-            style="background-color: white; color: black"
-            disabled
-            type="text"
-            value="Informação"
-            id="quandoCriado"
-          />
+          <input style="background-color: white; color: black" disabled type="text" value="Informação"
+            id="quandoCriado" />
         </label>
         <label for="quemCriado">
           Por quem foi criado:
-          <input
-            style="background-color: white; color: black"
-            disabled
-            type="text"
-            value="Informação"
-            id="quemCriado"
-          />
+          <input style="background-color: white; color: black" disabled type="text" value="Informação" id="quemCriado" />
         </label>
       </h3>
     </template>
   </ModalApp>
-  <ModalApp
-    v-if="typeModal[0] == 'editar'"
-    ref="modal"
-    @fechar-modal="respostaClick(false)"
-    :typeModal="true"
-  >
+  <ModalApp v-if="typeModal[0] == 'editar'" ref="modal" @fechar-modal="respostaClick(false)" :typeModal="true">
     <template #modalTitle>
       <h3>Editar Informação:</h3>
     </template>
@@ -132,7 +90,7 @@ import infoData from "../infoData";
   props: {
     typeModal: Array,
   },
-  emits: ["resposta-modal", "exibir-modal"],
+  emits: ["resposta-modal", "exibir-modal", "exibir-loading"],
   mounted() {
     this.typeModal = this.$props.typeModal;
     this.$nextTick(() => {
@@ -148,7 +106,9 @@ export default class dialogModal extends Vue {
   typeModal: any = [];
   informacaoNova = "";
   respostaClick(resposta: any) {
+
     const modal = this.$refs.modal as any;
+
     if (resposta == true) this.verificarAcao();
 
     modal.fecharModal();
@@ -163,6 +123,7 @@ export default class dialogModal extends Vue {
 
         break;
       case "editar":
+
         this.atualizarInformacao(id);
         break;
     }
@@ -182,13 +143,15 @@ export default class dialogModal extends Vue {
             "exibir-modal",
             false,
             "Falha",
-            "A informação não pôde ser deletada: </br>" + result[1]
-          );
+            "A informação não pôde ser deletada: </br>" + result[1][0]
+          );         
+
         }
       }
     );
   }
   async buscarInformacao(id: number) {
+    this.$emit('exibir-loading', true);
     await Informacao.buscarInformacao(id).then((resultado) => {
       if (resultado[0] == true) {
         var informacao = resultado[1].informacao;
@@ -199,18 +162,26 @@ export default class dialogModal extends Vue {
           informacao.updated_at,
           informacao.user.nomeUsuario
         );
+
         this.setViewInformacoes(informacao);
+        this.$emit('exibir-loading', false);
+
+
       } else {
-        this.enviarResposta(false);
+        this.$emit('exibir-loading', false);
         this.$emit(
           "exibir-modal",
           false,
           "Falha",
           "Não foi possível carregar as informações para visualização: </br>" +
-            resultado[1]
+          resultado[1]
         );
+        //this.enviarResposta(false);
+
       }
-    });
+    }).finally(() => {
+      this.$emit('exibir-loading', false);
+    })
   }
   setViewInformacoes(informacao: infoData) {
     (document.getElementById("id")! as HTMLInputElement).value =
@@ -260,12 +231,14 @@ h3.button_list {
   border-top: 1px solid black;
   margin: 2%;
 }
+
 button {
   cursor: pointer;
   border: 0;
   outline: 0;
   border-radius: 10px;
 }
+
 h3 button {
   font-size: 20px;
   padding: 1%;
@@ -273,15 +246,18 @@ h3 button {
   margin: 1%;
   min-width: 200px;
 }
+
 label {
   padding: 0% 4%;
   display: flex;
   flex-flow: column wrap;
 }
+
 h3.modalMessage {
   padding: 0 2%;
   width: 100%;
 }
+
 input#informacao {
   width: 100%;
   border-radius: 10px;
@@ -289,10 +265,12 @@ input#informacao {
   outline: 0;
   padding: 2%;
 }
+
 p.error {
   color: red;
   font-size: 0.8vw;
 }
+
 @media (max-width: 900px) {
   h3 button {
     padding: 3%;

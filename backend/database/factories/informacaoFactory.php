@@ -18,7 +18,7 @@ class informacaoFactory extends Factory
     {
         return [
             'informacao' => fake()->text(),
-            'isDeleted' => true
+            'isDeleted' => false
         ];
     }
 }
