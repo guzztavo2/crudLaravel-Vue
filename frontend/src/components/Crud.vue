@@ -3,6 +3,7 @@
     v-if="openModal"
     :typeModal="typeModal"
     @resposta-modal="respostaModal"
+    @exibir-modal="dispararModal"
   ></dialogModal>
   <section class="crud">
     <div class="container">
@@ -72,58 +73,10 @@
 </template>
 
 <script lang="ts">
-class infoData {
-  public id!: number;
-  public informacao!: string;
-  public criadoQuando!: string;
-  public atualizadoQuando!: string;
-  public nomeUsuario!: string;
-
-  constructor(
-    id: number,
-    informacao: string,
-    criadoQuando: string,
-    atualizadoQuando: string,
-    nomeUsuario: string
-  ) {
-    this.id = id;
-    this.informacao = informacao;
-
-    this.setCriadoQuando(criadoQuando);
-    if (criadoQuando !== atualizadoQuando)
-      this.setAtualizadoQuando(atualizadoQuando);
-    else this.atualizadoQuando = "Ainda não foi atualizado";
-    this.nomeUsuario = nomeUsuario;
-  }
-  private dataToString(data: string) {
-    const date = new Date(data);
-    return date.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
-  }
-  private setCriadoQuando(criadoQuando: string) {
-    this.criadoQuando = this.dataToString(criadoQuando);
-  }
-  private setAtualizadoQuando(atualizadoQuando: string) {
-    this.atualizadoQuando = this.dataToString(atualizadoQuando);
-  }
-  public static arrayToObject(listArray: any[]) {
-    const resultArray: Array<infoData> = [];
-    listArray.forEach((item) => {
-      const object = new infoData(
-        item.id,
-        item.informacao,
-        item.created_at,
-        item.updated_at,
-        item.user.nomeUsuario
-      );
-      resultArray.push(object);
-    });
-
-    return resultArray;
-  }
-}
 import { Vue, Options } from "vue-class-component";
 import Informacao from "./Informacao";
 import dialogModal from "./Elements/dialogModal.vue";
+import infoData from "./infoData";
 @Options({
   async mounted() {
     await this.getInformacoes();
@@ -136,19 +89,17 @@ export default class crud extends Vue {
   selecaoAtivada = false;
   listInformacoes: Array<infoData> = [];
   currentPage!: number;
-
   quantityPages!: number;
   resquestOrder: Array<string> = [];
-  
-  typeModal:any = [];
+  typeModal: any = [];
   openModal = false;
-  respostaModal(item: any) {
-    if(item[0] == true){
-      //deletar informação!!!!
-    }
+  respostaModal(resposta: boolean) {
     this.openModal = false;
+    if (resposta == true) this.getInformacoes();
   }
-
+  dispararModal(typeModal: boolean, titleModal: string, messageModal: string) {
+    this.$emit("exibir-modal", typeModal, titleModal, messageModal);
+  }
   orderByEvent() {
     const elements = document.querySelectorAll("tr.head th[order]");
     elements.forEach((element) => {
@@ -243,32 +194,40 @@ export default class crud extends Vue {
       });
     }
 
-    const atualizarInformacaoEvent = (listItems: any) => {
-      listItems.forEach(function (item: HTMLElement) {
-        item.addEventListener("click", function (event: Event) {
-          console.log("evento de lista");
-        });
-      });
-    };
     this.orderByEvent();
-    atualizarInformacaoEvent(document.querySelectorAll("#informacaoRow"));
-    this.deletarEditarEvents();
+    this.crudEvents();
   }
-  deletarEditarEvents() {
+  crudEvents() {
     document.querySelectorAll("#deletarItem").forEach((item) => {
       item.addEventListener("click", () => {
-        const element = item.parentElement?.parentElement?.parentElement?.getAttribute('identificador')
-        this.typeModal =['deletar', element];
+        const element =
+          item.parentElement?.parentElement?.parentElement?.getAttribute(
+            "identificador"
+          );
+        this.typeModal = ["deletar", element];
         this.openModal = true;
       });
     });
     document.querySelectorAll("#editarItem").forEach((item) => {
       item.addEventListener("click", () => {
-        const element = item.parentElement?.parentElement?.parentElement?.getAttribute('identificador')
-        this.typeModal =['visualizar', element];
+        const element =
+          item.parentElement?.parentElement?.parentElement?.getAttribute(
+            "identificador"
+          );
+        this.typeModal = ["editar", element];
         this.openModal = true;
       });
     });
+    if (this.selecaoAtivada == false) {
+      document.querySelectorAll("#informacaoRow").forEach((item) => {
+        item.addEventListener("click", () => {
+          const element = item.getAttribute("identificador");
+
+          this.typeModal = ["visualizar", element];
+          this.openModal = true;
+        });
+      });
+    }
   }
   adicionarPaginacao() {
     const paginacao = this.$refs.paginacao as HTMLElement,
@@ -513,4 +472,43 @@ section.crud div.buttons button.selecionar {
   color: black;
   border: 1px solid black;
 }
+
+@media (max-width:1500px) {
+  section.crud table td p.flexRow i {
+  font-size: 20px;
+}
+section.crud table td p.flexRow i > span {
+
+top: -30px;
+left:-10px;
+font-size: 16px;
+
+}
+section.crud div.buttons button {
+font-size: 20px;
+
+}
+section.crud div.paginacao h1 {
+  padding: 1% 3%;
+
+}
+}
+@media (max-width:900px) {
+  section.crud div.container{
+    max-width:100%;
+  }
+  section.crud div.paginacao h1 {
+  padding: 1% 4%;
+
+}
+
+}
+@media (max-width: 690px) {
+  section.crud {
+    height: 88%;
+  }
+}
+
+
+
 </style>

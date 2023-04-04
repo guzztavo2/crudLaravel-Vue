@@ -32,4 +32,7 @@ Route::controller(userController::class)->middleware(['auth:sanctum', HandleCors
 });
 Route::controller(informacaoController::class)->middleware([HandleCors::class])->group(function () {
     Route::get('/informacao', 'informacao');
+    Route::get('/informacao/{id}', 'buscarInformacao');
+    Route::delete('/informacao/{id}', 'deletarInformacao');
+    Route::put('/editarInformacao/{id}', 'editarInformacao');
 });

@@ -14,7 +14,6 @@
     </template>
   </modalApp>
   <headerApp
-
     :currentPage="currentPage"
     @atualizar-pagina="atualizarPagina"
     @exibir-modal="dispararModal"

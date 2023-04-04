@@ -209,7 +209,7 @@ div.message div.text__wrapper {
   div.message {
     width: 80%;
     padding: 0 0 4% 0;
-    top: 20%;
+    top: 40%;
   }
 }
 
@@ -217,7 +217,7 @@ div.message div.text__wrapper {
   div.message {
     width: 96%;
     padding: 0 0 5% 0;
-    top: 20%;
+   
   }
 }
 </style>
