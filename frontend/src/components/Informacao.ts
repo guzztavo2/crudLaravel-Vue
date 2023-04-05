@@ -12,19 +12,14 @@ export default class Informacao {
     if (request !== undefined && request.length > 0)
       query = "?" + request[0] + "=" + request[1];
 
-    if (buscar == undefined || buscar.length > 0){
-      if(query.length > 0)
-      query += "&buscar=" + buscar;
-      else
-      query += "?buscar=" + buscar;
-
+    if (buscar == undefined || buscar.length > 0) {
+      if (query.length > 0) query += "&buscar=" + buscar;
+      else query += "?buscar=" + buscar;
     }
-    
-    let serverUrl = '';
-    if(query.length > 0)
-    serverUrl = "/informacao" + query + "&page=" + page;
-    else
-    serverUrl = "/informacao?page=" + page;
+
+    let serverUrl = "";
+    if (query.length > 0) serverUrl = "/informacao" + query + "&page=" + page;
+    else serverUrl = "/informacao?page=" + page;
 
     await AxiosInstance.get(serverUrl)
       .then((result) => {
@@ -81,7 +76,7 @@ export default class Informacao {
     await AxiosInstance.put("/editarInformacao/" + id, {
       informacao: novaInformacao,
     })
-      .then((sucess) => {
+      .then(() => {
         resultado.push(true);
       })
       .catch((error) => {

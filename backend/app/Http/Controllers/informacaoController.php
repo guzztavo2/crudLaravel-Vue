@@ -14,9 +14,8 @@ class informacaoController extends Controller
     public function registro()
     {
     }
-    public function informacao(Request $request)
+    private static function requestQuery(Request $request)
     {
-
         $onlyRequest = [
             'id',
             'informacao',
@@ -34,35 +33,31 @@ class informacaoController extends Controller
                 break;
             }
         }
-        if (strlen($requestItem) > 0 && in_array($request->query->all()[$requestItem], $onlyValues)) {
-            array_push($requestArray, $requestKey, $request->query->all()[$requestItem]);
-        }
 
-        if ($request->buscar == null) {
-            if (count($requestArray) === 0)
-                return response()->json(Informacao::with('user')->where('isDeleted', false)->paginate(7), 200);
-            else
-                return response()->json(Informacao::with('user')
-                    ->orderBy($requestArray[0], $requestArray[1])
-                    ->where('isDeleted', false)->paginate(7), 200);
+        if (strlen($requestItem) > 0 && in_array($request->query->all()[$requestItem], $onlyValues))
+            array_push($requestArray, $requestItem, $request->query->all()[$requestItem]);
 
-        } else {
-            $buscar = $request->buscar;
-            dd($buscar);
-            if (count($requestArray) === 0) {
-                return response()->json(Informacao::with('user')
-                    ->orWhere('isDeleted', false)
-                    ->orWhere('informacao', 'like', "%" . $buscar . "%")
-                    ->orWhere('id', 'like', "%" . $buscar . "%")
-                    ->paginate(7), 200);
-            } else
-                return response()->json(Informacao::with('user')
-                    ->orWhere('isDeleted', false)
-                    ->orWhere('informacao', 'like', "%" . $buscar . "%")
-                    ->orWhere('id', 'like', "%" . $buscar . "%")
-                    ->orderBy($requestArray[0], $requestArray[1])
-                    ->paginate(7), 200);
-        }
+        return $requestArray;
+    }
+    public function informacao(Request $request, Informacao $informacao)
+    {
+        $requestArray = self::requestQuery($request);
+        $buscar = $request->buscar;
+
+        $query = $informacao::with('user')
+            ->where('isDeleted', false)
+            ->when($buscar, function ($query, $buscar) {
+                return $query->where(function ($query) use ($buscar) {
+                    $query->where('informacao', 'like', "%{$buscar}%")
+                        ->orWhere('id', 'like', "%{$buscar}%");
+                });
+            });
+
+        $query = $query->when(count($requestArray) > 0, function ($query) use ($requestArray) {
+            return $query->orderBy($requestArray[0], $requestArray[1]);
+        });
+
+        return response()->json($query->paginate(7), 200);
     }
     public function editarInformacao(Request $request, $id)
     {

@@ -317,12 +317,11 @@ export default class crud extends Vue {
           });
         });
       };
-    if (paginacao !== undefined && paginacao !== null) {
-      this.paginacaoInHTML(paginacao);
-      paginaAnterior();
-      proximaPagina();
-      paginaEvent();
-    }
+
+    this.paginacaoInHTML(paginacao);
+    paginaAnterior();
+    proximaPagina();
+    paginaEvent();
   }
   paginacaoInHTML(paginacao: HTMLElement) {
     paginacao.innerHTML = "";
@@ -348,7 +347,6 @@ export default class crud extends Vue {
     this.currentPage = page;
     this.getInformacoes();
   }
-
   adicionarInformacao() {
     alert("a");
   }
