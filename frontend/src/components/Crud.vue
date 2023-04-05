@@ -1,22 +1,54 @@
 <template>
-  <dialogModal v-if="openModal" :typeModal="typeModal" @exibir-loading="exibirLoading" @resposta-modal="respostaModal" @exibir-modal="dispararModal">
+  <dialogModal
+    v-if="openModal"
+    :typeModal="typeModal"
+    @exibir-loading="exibirLoading"
+    @resposta-modal="respostaModal"
+    @exibir-modal="dispararModal"
+  >
   </dialogModal>
   <section class="crud">
     <div class="container">
       <h1>Gerenciar Informações</h1>
       <div class="buttons">
-        <button @click="adicionarInformacao" class="adicionar">
+        <button
+          @click="adicionarInformacao"
+          v-if="selecaoAtivada == false"
+          class="adicionar"
+        >
           Adicionar Informação <i class="fa-solid fa-plus"></i>
         </button>
-        <button class="selecionar" @click="alterarSelecao" v-if="selecaoAtivada == false">
+        <button
+          class="selecionar"
+          @click="alterarSelecao"
+          v-if="selecaoAtivada == false"
+        >
           Selecionar itens <i class="fa-regular fa-square-check"></i>
         </button>
-        <button class="remover" v-if="selecaoAtivada && listInformacoes.length > 0">
+        <button
+          class="remover"
+          v-if="selecaoAtivada && listInformacoes.length > 0"
+        >
           Remover Informação <i class="fa-solid fa-minus"></i>
         </button>
-        <button class="selecionar" @click="alterarSelecao" v-if="selecaoAtivada == true">
+        <button
+          class="selecionar"
+          @click="alterarSelecao"
+          v-if="selecaoAtivada == true"
+        >
           Cancelar seleção <i class="fa-regular fa-square-check"></i>
         </button>
+
+        <label for="buscarInfo"
+          ><p>Buscar Informações</p>
+          <input
+            v-model="buscarInfo"
+            @keypress="inputEnterPressionado"
+            type="text"
+            name=""
+            id="buscarInfo"
+          />
+        </label>
       </div>
       <div class="table_wrapper">
         <table v-if="selecaoAtivada === true" ref="table">
@@ -70,7 +102,11 @@
           </tr>
         </table>
       </div>
-      <div v-if="listInformacoes.length > 0" ref="paginacao" class="flexRow paginacao"></div>
+      <div
+        v-if="listInformacoes.length > 0"
+        ref="paginacao"
+        class="flexRow paginacao"
+      ></div>
     </div>
   </section>
 </template>
@@ -96,12 +132,17 @@ export default class crud extends Vue {
   resquestOrder: Array<string> = [];
   typeModal: any = [];
   openModal = false;
+  buscarInfo = "";
   respostaModal(resposta: boolean) {
     this.openModal = false;
     if (resposta == true) this.getInformacoes();
   }
+  inputEnterPressionado(event: Event) {
+    if ((event as any).key == "Enter") {
+      this.getInformacoes();
+    }
+  }
   dispararModal(typeModal: boolean, titleModal: string, messageModal: string) {
-    alert('a');
     console.log(messageModal);
     this.$emit("exibir-modal", typeModal, titleModal, messageModal);
   }
@@ -129,12 +170,16 @@ export default class crud extends Vue {
 
     this.getInformacoes();
   }
-  exibirLoading(valor:boolean){
-    this.$emit('exibir-loading', valor);
+  exibirLoading(valor: boolean) {
+    this.$emit("exibir-loading", valor);
   }
   async getInformacoes() {
     this.$emit("exibir-loading", true);
-    await Informacao.getInformacoesList(this.currentPage, this.resquestOrder)
+    await Informacao.getInformacoesList(
+      this.currentPage,
+      this.resquestOrder,
+      this.buscarInfo
+    )
       .then((result) => {
         if (result[0] == true) {
           const resultData = result[1];
@@ -226,13 +271,24 @@ export default class crud extends Vue {
         this.openModal = true;
       });
     });
+    const rowInformacoes = (func: any) => {
+      document.querySelectorAll("#informacaoRow").forEach(func);
+    };
+
     if (this.selecaoAtivada == false) {
-      document.querySelectorAll("#informacaoRow").forEach((item) => {
+      rowInformacoes((item: any) => {
         item.addEventListener("click", () => {
           const element = item.getAttribute("identificador");
-
           this.typeModal = ["visualizar", element];
           this.openModal = true;
+        });
+      });
+    } else {
+      rowInformacoes((item: any) => {
+        item.addEventListener("click", () => {
+          const checkbox = item.querySelector('input[type="checkbox"]');
+          if (checkbox.checked == true) checkbox.checked = false;
+          else checkbox.checked = true;
         });
       });
     }
@@ -241,7 +297,6 @@ export default class crud extends Vue {
     const paginacao = this.$refs.paginacao as HTMLElement,
       currentEvent = this.setCurrentPage,
       currentPage = this.currentPage,
-      quantidadePaginas = this.quantityPages,
       paginaAnterior = () => {
         const pagina = document.querySelector("#paginaAnterior");
         pagina?.addEventListener("click", function () {
@@ -262,16 +317,14 @@ export default class crud extends Vue {
           });
         });
       };
-    if (paginacao !== undefined) {
+    if (paginacao !== undefined && paginacao !== null) {
       this.paginacaoInHTML(paginacao);
       paginaAnterior();
       proximaPagina();
       paginaEvent();
     }
-
-
   }
-  paginacaoInHTML(paginacao: HTMLElement,) {
+  paginacaoInHTML(paginacao: HTMLElement) {
     paginacao.innerHTML = "";
     paginacao.innerHTML +=
       '<h1 id="paginaAnterior"><i class="fa-solid fa-caret-left"></i></h1>';
@@ -306,7 +359,20 @@ export default class crud extends Vue {
 .dNone {
   display: none !important;
 }
-
+label[for="buscarInfo"] {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.445);
+  border-radius: 10px;
+  padding: 1% 4%;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: left;
+  justify-content: center;
+}
+label[for="buscarInfo"] input {
+  border: 1px solid rgba(0, 0, 0, 0.445);
+  width: 100%;
+}
 section.crud div.paginacao {
   padding: 1%;
   justify-content: center;
@@ -354,7 +420,7 @@ section.crud table td p.flexRow i {
   position: relative;
 }
 
-section.crud table td p.flexRow i>span {
+section.crud table td p.flexRow i > span {
   position: absolute;
   top: -40px;
   z-index: 2;
@@ -368,7 +434,7 @@ section.crud table td p.flexRow i>span {
   padding: 4%;
 }
 
-section.crud table td p.flexRow i:hover>span {
+section.crud table td p.flexRow i:hover > span {
   display: block;
 }
 
@@ -449,14 +515,14 @@ section.crud {
   height: 90%;
 }
 
-section.crud>div.container {
+section.crud > div.container {
   width: 100%;
   height: 100%;
   padding: 0 1%;
   overflow: auto;
 }
 
-section.crud>div.container>h1 {
+section.crud > div.container > h1 {
   font-weight: 900;
   text-transform: uppercase;
   padding: 1%;
@@ -510,44 +576,39 @@ section.crud div.buttons button.selecionar {
   border: 1px solid black;
 }
 
-@media (max-width:1500px) {
+@media (max-width: 1500px) {
   section.crud table td p.flexRow i {
     font-size: 20px;
   }
 
-  section.crud table td p.flexRow i>span {
-
+  section.crud table td p.flexRow i > span {
     top: -30px;
     left: -10px;
     font-size: 16px;
-
   }
 
   section.crud div.buttons button {
     font-size: 20px;
-
   }
 
   section.crud div.paginacao h1 {
     padding: 1% 3%;
-
   }
 }
 
-@media (max-width:900px) {
+@media (max-width: 900px) {
   section.crud div.container {
     max-width: 100%;
   }
 
   section.crud div.paginacao h1 {
     padding: 1% 4%;
-
   }
-
 }
 
 @media (max-width: 690px) {
   section.crud {
     height: 88%;
   }
-}</style>
+}
+</style>

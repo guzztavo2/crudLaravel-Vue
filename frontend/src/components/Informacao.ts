@@ -2,31 +2,31 @@ import AxiosInstance from "./axiosRequest";
 export default class Informacao {
   public static async getInformacoesList(
     page: number | null,
-    request: Array<string> | undefined
+    request: Array<string> | undefined,
+    buscar: string | undefined
   ) {
     const resultado: any = [];
     if (page == undefined) page = 1;
+    let query = "";
 
-    if (request !== undefined && request?.length > 0) {
-      await AxiosInstance.get(
-        "/informacao?"+ request[0] +"="+ request[1] + "&page=" +page
-      )
-        .then((result) => {
-          resultado.push(true, result.data);
-        })
-        .catch((error) => {
-          if (error.response !== undefined)
-            resultado.push(false, error.response.data.errors);
-          else
-            resultado.push(
-              false,
-              "Não foi possível acessar o servidor no momento..."
-            );
-        });
+    if (request !== undefined && request.length > 0)
+      query = "?" + request[0] + "=" + request[1];
 
-      return resultado;
+    if (buscar == undefined || buscar.length > 0){
+      if(query.length > 0)
+      query += "&buscar=" + buscar;
+      else
+      query += "?buscar=" + buscar;
+
     }
-    await AxiosInstance.get("/informacao?page=" + page)
+    
+    let serverUrl = '';
+    if(query.length > 0)
+    serverUrl = "/informacao" + query + "&page=" + page;
+    else
+    serverUrl = "/informacao?page=" + page;
+
+    await AxiosInstance.get(serverUrl)
       .then((result) => {
         resultado.push(true, result.data);
       })
@@ -42,49 +42,57 @@ export default class Informacao {
 
     return resultado;
   }
-  public static async deletarInformacao(id:number){
-    const resultado:any = [];
-    await AxiosInstance.delete('/informacao/' + id).then(result =>{
-      resultado.push(true, result.data);
-    }) .catch((error) => {
-      if (error.response !== undefined)
-        resultado.push(false, error.response.data.erro);
-      else
-        resultado.push(
-          false,
-          "Não foi possível acessar o servidor no momento..."
-        );
-    })
+  public static async deletarInformacao(id: number) {
+    const resultado: any = [];
+    await AxiosInstance.delete("/informacao/" + id)
+      .then((result) => {
+        resultado.push(true, result.data);
+      })
+      .catch((error) => {
+        if (error.response !== undefined)
+          resultado.push(false, error.response.data.erro);
+        else
+          resultado.push(
+            false,
+            "Não foi possível acessar o servidor no momento..."
+          );
+      });
     return resultado;
   }
-  public static async buscarInformacao(id:number){
-    const resultado:any = [];
-    await AxiosInstance.get('/informacao/' + id).then(result =>{
-      resultado.push(true, result.data);
-    }) .catch((error) => {
-      if (error.response !== undefined)
-        resultado.push(false, error.response.data.erro);
-      else
-        resultado.push(
-          false,
-          "Não foi possível acessar o servidor no momento..."
-        );
-    })
+  public static async buscarInformacao(id: number) {
+    const resultado: any = [];
+    await AxiosInstance.get("/informacao/" + id)
+      .then((result) => {
+        resultado.push(true, result.data);
+      })
+      .catch((error) => {
+        if (error.response !== undefined)
+          resultado.push(false, error.response.data.erro);
+        else
+          resultado.push(
+            false,
+            "Não foi possível acessar o servidor no momento..."
+          );
+      });
     return resultado;
   }
-  public static async atualizarInformacao(id:number, novaInformacao:string){
-    const resultado:any = [];
-    await AxiosInstance.put('/editarInformacao/' + id, {'informacao':novaInformacao}).then(sucess => {
-      resultado.push(true);
-    }).catch(error => {
-      if (error.response !== undefined)
-      resultado.push(false, error.response.data.erro);
-    else
-      resultado.push(
-        false,
-        "Não foi possível acessar o servidor no momento..."
-      );
+  public static async atualizarInformacao(id: number, novaInformacao: string) {
+    const resultado: any = [];
+    await AxiosInstance.put("/editarInformacao/" + id, {
+      informacao: novaInformacao,
     })
+      .then((sucess) => {
+        resultado.push(true);
+      })
+      .catch((error) => {
+        if (error.response !== undefined)
+          resultado.push(false, error.response.data.erro);
+        else
+          resultado.push(
+            false,
+            "Não foi possível acessar o servidor no momento..."
+          );
+      });
     return resultado;
   }
 }

@@ -1,5 +1,10 @@
 <template>
-  <ModalApp v-if="typeModal[0] == 'deletar'" ref="modal" @fechar-modal="respostaClick(false)" :typeModal="false">
+  <ModalApp
+    v-if="typeModal[0] == 'deletar'"
+    ref="modal"
+    @fechar-modal="respostaClick(false)"
+    :typeModal="false"
+  >
     <template #modalTitle>
       <h3>Você tem certeza que deseja deletar essa informação?</h3>
     </template>
@@ -14,7 +19,12 @@
       </h3>
     </template>
   </ModalApp>
-  <ModalApp v-if="typeModal[0] == 'visualizar'" ref="modal" @fechar-modal="respostaClick(false)" :typeModal="true">
+  <ModalApp
+    v-if="typeModal[0] == 'visualizar'"
+    ref="modal"
+    @fechar-modal="respostaClick(false)"
+    :typeModal="true"
+  >
     <template #modalTitle>
       <h3>Visualizar Informação:</h3>
     </template>
@@ -22,31 +32,63 @@
       <h3>
         <label for="id">
           ID:
-          <input disabled style="background-color: white; color: black" type="text" value="Informação" id="id" />
+          <input
+            disabled
+            style="background-color: white; color: black"
+            type="text"
+            value="Informação"
+            id="id"
+          />
         </label>
 
         <label for="informacao">
           Informação:
-          <input style="background-color: white; color: black" disabled type="text" id="informacao" />
+          <input
+            style="background-color: white; color: black"
+            disabled
+            type="text"
+            id="informacao"
+          />
         </label>
         <label for="quandoAtualizado">
           Atualizar:
-          <input style="background-color: white; color: black" disabled type="text" value="Informação"
-            id="quandoAtualizado" />
+          <input
+            style="background-color: white; color: black"
+            disabled
+            type="text"
+            value="Informação"
+            id="quandoAtualizado"
+          />
         </label>
         <label for="quandoCriado">
           Quando foi criado:
-          <input style="background-color: white; color: black" disabled type="text" value="Informação"
-            id="quandoCriado" />
+          <input
+            style="background-color: white; color: black"
+            disabled
+            type="text"
+            value="Informação"
+            id="quandoCriado"
+          />
         </label>
         <label for="quemCriado">
           Por quem foi criado:
-          <input style="background-color: white; color: black" disabled type="text" value="Informação" id="quemCriado" />
+          <input
+            style="background-color: white; color: black"
+            disabled
+            type="text"
+            value="Informação"
+            id="quemCriado"
+          />
         </label>
       </h3>
     </template>
   </ModalApp>
-  <ModalApp v-if="typeModal[0] == 'editar'" ref="modal" @fechar-modal="respostaClick(false)" :typeModal="true">
+  <ModalApp
+    v-if="typeModal[0] == 'editar'"
+    ref="modal"
+    @fechar-modal="respostaClick(false)"
+    :typeModal="true"
+  >
     <template #modalTitle>
       <h3>Editar Informação:</h3>
     </template>
@@ -106,7 +148,6 @@ export default class dialogModal extends Vue {
   typeModal: any = [];
   informacaoNova = "";
   respostaClick(resposta: any) {
-
     const modal = this.$refs.modal as any;
 
     if (resposta == true) this.verificarAcao();
@@ -120,68 +161,52 @@ export default class dialogModal extends Vue {
     switch (this.typeModal[0]) {
       case "deletar":
         this.deletarInformacao(id);
-
         break;
       case "editar":
-
         this.atualizarInformacao(id);
         break;
+      
     }
   }
+  exibirModal(typeModal:boolean, titleModal:string, messageModal:string){
+    this.$emit('exibir-modal', typeModal, titleModal, messageModal);
+
+  }
   async atualizarInformacao(id: number) {
-    await Informacao.atualizarInformacao(id, this.informacaoNova).then(
-      (result) => {
-        if (result[0]) {
-          this.$emit(
-            "exibir-modal",
-            true,
-            "Sucesso",
-            "A informação foi deletada com sucesso"
+    const resultado: any = [];
+    await Informacao.atualizarInformacao(id, this.informacaoNova);   
+  }
+  async buscarInformacao(id: number) {
+    this.$emit("exibir-loading", true);
+    await Informacao.buscarInformacao(id)
+      .then((resultado) => {
+        if (resultado[0] == true) {
+          var informacao = resultado[1].informacao;
+          informacao = new infoData(
+            informacao.id,
+            informacao.informacao,
+            informacao.created_at,
+            informacao.updated_at,
+            informacao.user.nomeUsuario
           );
+
+          this.setViewInformacoes(informacao);
+          this.$emit("exibir-loading", false);
         } else {
+          this.$emit("exibir-loading", false);
           this.$emit(
             "exibir-modal",
             false,
             "Falha",
-            "A informação não pôde ser deletada: </br>" + result[1][0]
-          );         
-
+            "Não foi possível carregar as informações para visualização: </br>" +
+              resultado[1]
+          );
+          //this.enviarResposta(false);
         }
-      }
-    );
-  }
-  async buscarInformacao(id: number) {
-    this.$emit('exibir-loading', true);
-    await Informacao.buscarInformacao(id).then((resultado) => {
-      if (resultado[0] == true) {
-        var informacao = resultado[1].informacao;
-        informacao = new infoData(
-          informacao.id,
-          informacao.informacao,
-          informacao.created_at,
-          informacao.updated_at,
-          informacao.user.nomeUsuario
-        );
-
-        this.setViewInformacoes(informacao);
-        this.$emit('exibir-loading', false);
-
-
-      } else {
-        this.$emit('exibir-loading', false);
-        this.$emit(
-          "exibir-modal",
-          false,
-          "Falha",
-          "Não foi possível carregar as informações para visualização: </br>" +
-          resultado[1]
-        );
-        //this.enviarResposta(false);
-
-      }
-    }).finally(() => {
-      this.$emit('exibir-loading', false);
-    })
+      })
+      .finally(() => {
+        this.$emit("exibir-loading", false);
+      });
   }
   setViewInformacoes(informacao: infoData) {
     (document.getElementById("id")! as HTMLInputElement).value =

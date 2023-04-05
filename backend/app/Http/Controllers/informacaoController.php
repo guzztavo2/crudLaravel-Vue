@@ -16,18 +16,37 @@ class informacaoController extends Controller
     }
     public function informacao(Request $request)
     {
+
         $onlyRequest = [
             'id', 'informacao', 'created_at', 'updated_at', 'page'
         ];
         $onlyValues = ['asc', 'desc'];
+        $requestArray = [];
         $requestKey = array_keys($request->query->all())[0];
         if (in_array($requestKey, $onlyRequest)) {
             $requestvalue = array_values($request->query->all())[0];
-            if (in_array($requestvalue, $onlyValues)) {
-                return response()->json(Informacao::with('user')->orderBy($requestKey, $requestvalue)->where('isDeleted', false)->paginate(7), 200);
-            }
+
+            if (in_array($requestvalue, $onlyValues))
+                Array_push($requestArray, $requestvalue, $onlyValues);
         }
-        return response()->json(Informacao::with('user')->where('isDeleted', false)->paginate(7), 200);
+
+        if ($request->buscar == null) {
+            if (count($requestArray) === 0)
+                return response()->json(Informacao::with('user')->where('isDeleted', false)->paginate(7), 200);
+            else
+                return response()->json(Informacao::with('user')->orderBy($requestKey, $requestvalue)->where('isDeleted', false)->paginate(7), 200);
+        } else {
+            $buscar = $request->buscar;
+            if (count($requestArray) === 0){
+                return response()->json(Informacao::with('user')
+                ->orWhere('isDeleted', false)
+                ->orWhere('informacao', 'like', "%" . $buscar . "%")
+                ->orWhere('id', 'like', "%" . $buscar . "%")
+                ->paginate(7), 200);
+            }
+            else
+                return response()->json(Informacao::with('user')->orderBy($requestKey, $requestvalue)->orWhere('isDeleted', false)->paginate(7), 200);
+        }
     }
     public function editarInformacao(Request $request, $id)
     {
@@ -52,7 +71,7 @@ class informacaoController extends Controller
 
         $user = $request->user();
         if ($user == null)
-            return response()->json(['erro' => 'O usuário não foi localizado, então não é possível deletar essa informação.'], 404);
+            return response()->json(['erro' => 'O usuário não foi localizado, então não é possível editar essa informação.'], 404);
 
         $informacao->atualizarInformacao($informacao, $user);
         return response()->json(['sucesso' => 'Informação salva com sucesso'], 200);
@@ -69,6 +88,23 @@ class informacaoController extends Controller
         $id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
         $informacao = Informacao::find($id);
         return $informacao;
+    }
+    public function deletarInformacoes(Request $request)
+    {
+
+        $validate = validator(
+            $request->all(),
+            ["informacao" => 'required|array|min:1|max:10'],
+            [
+                'required' => 'A informação é necessária para atualizar a informação',
+                'array' => 'É necessário ter várias informações, em forma de array para serem deletadas',
+                'min' => 'É preciso ter no minimo :min elemento.',
+                'max' => 'O é preciso ter no máximo :max elementos.'
+            ]
+        );
+
+
+        dd($validate);
     }
     public function deletarInformacao(Request $request, $id)
     {

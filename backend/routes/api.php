@@ -34,5 +34,7 @@ Route::controller(informacaoController::class)->middleware([HandleCors::class])-
     Route::get('/informacao', 'informacao');
     Route::get('/informacao/{id}', 'buscarInformacao');
     Route::delete('/informacao/{id}', 'deletarInformacao');
+    Route::delete('/informacao', 'deletarInformacoes');
+
     Route::put('/editarInformacao/{id}', 'editarInformacao');
 });

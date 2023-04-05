@@ -14,10 +14,10 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'http://localhost:8080', '*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'http://localhost:8081'],
     'allowed_headers' => ['Content-Type', 'X-Requested-With', 'Authorization'],
     'allowedMethods'         => ['DELETE', 'GET', 'POST', 'PUT'],
-    'allowedOrigins'         => ['http://localhost:8080'],
+    'allowedOrigins'         => ['http://localhost:8081'],
     //'Access-Control-Allow-Credentials' => true,
     //'allowedOriginsPatterns' => ['/localhost:\d/'],
     'exposedHeaders'         => ['*'],
