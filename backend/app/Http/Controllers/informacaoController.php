@@ -18,34 +18,50 @@ class informacaoController extends Controller
     {
 
         $onlyRequest = [
-            'id', 'informacao', 'created_at', 'updated_at', 'page'
+            'id',
+            'informacao',
+            'created_at',
+            'updated_at'
         ];
         $onlyValues = ['asc', 'desc'];
+        $requestKey = array_keys($request->query->all());
         $requestArray = [];
-        $requestKey = array_keys($request->query->all())[0];
-        if (in_array($requestKey, $onlyRequest)) {
-            $requestvalue = array_values($request->query->all())[0];
 
-            if (in_array($requestvalue, $onlyValues))
-                Array_push($requestArray, $requestvalue, $onlyValues);
+        $requestItem = '';
+        foreach ($requestKey as $request_) {
+            if (in_array($request_, $onlyRequest)) {
+                $requestItem = $request_;
+                break;
+            }
+        }
+        if (strlen($requestItem) > 0 && in_array($request->query->all()[$requestItem], $onlyValues)) {
+            array_push($requestArray, $requestKey, $request->query->all()[$requestItem]);
         }
 
         if ($request->buscar == null) {
             if (count($requestArray) === 0)
                 return response()->json(Informacao::with('user')->where('isDeleted', false)->paginate(7), 200);
             else
-                return response()->json(Informacao::with('user')->orderBy($requestKey, $requestvalue)->where('isDeleted', false)->paginate(7), 200);
+                return response()->json(Informacao::with('user')
+                    ->orderBy($requestArray[0], $requestArray[1])
+                    ->where('isDeleted', false)->paginate(7), 200);
+
         } else {
             $buscar = $request->buscar;
-            if (count($requestArray) === 0){
+            dd($buscar);
+            if (count($requestArray) === 0) {
                 return response()->json(Informacao::with('user')
-                ->orWhere('isDeleted', false)
-                ->orWhere('informacao', 'like', "%" . $buscar . "%")
-                ->orWhere('id', 'like', "%" . $buscar . "%")
-                ->paginate(7), 200);
-            }
-            else
-                return response()->json(Informacao::with('user')->orderBy($requestKey, $requestvalue)->orWhere('isDeleted', false)->paginate(7), 200);
+                    ->orWhere('isDeleted', false)
+                    ->orWhere('informacao', 'like', "%" . $buscar . "%")
+                    ->orWhere('id', 'like', "%" . $buscar . "%")
+                    ->paginate(7), 200);
+            } else
+                return response()->json(Informacao::with('user')
+                    ->orWhere('isDeleted', false)
+                    ->orWhere('informacao', 'like', "%" . $buscar . "%")
+                    ->orWhere('id', 'like', "%" . $buscar . "%")
+                    ->orderBy($requestArray[0], $requestArray[1])
+                    ->paginate(7), 200);
         }
     }
     public function editarInformacao(Request $request, $id)
