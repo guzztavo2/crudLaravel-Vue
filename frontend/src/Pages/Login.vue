@@ -34,14 +34,11 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import headerApp from "./Elements/header.vue";
-import footerApp from "./Elements/footer.vue";
-import User from "./User";
-// import axios from "axios";
+import User from "../components/User";
 @Options({
   data() {
     return {
-      emits: ["atualizar-pagina", "exibir-modal",'exibir-loading'],
+      emits: ["atualizar-pagina", "exibir-modal", "exibir-loading"],
       nomeUsuario: {
         require: true,
         type: String,
@@ -50,11 +47,7 @@ import User from "./User";
         require: true,
         type: String,
       },
-    };
-  },
-  components: {
-    headerApp,
-    footerApp,
+    }
   },
   props: {},
   methods: {},
@@ -155,31 +148,31 @@ export default class Login extends Vue {
       true,
       document.querySelector("div.loginForms button")
     );
-    this.$emit('exibir-loading', true);
+    this.$emit("exibir-loading", true);
 
-
-
-    User.loginUser(this.nomeUsuario, this.senhaUsuario).then((response) => {
-      if (response[0] == false) {
-        this.$emit(
-          "exibir-modal",
-          false,
-          "Não foi possível acessar o usuário!",
-          response[1]
-        );
-      } else {
-        this.$emit("atualizar-pagina", "home");
-        this.$emit(
-          "exibir-modal",
-          true,
-          "Acesso concebido!",
-          "Parabéns, você tem acesso em sua conta"
-        );
-        this.$emit('exibir-loading', false);
-      }
-    }).finally(()=>{
-      this.$emit('exibir-loading', false);
-    });
+    User.loginUser(this.nomeUsuario, this.senhaUsuario)
+      .then((response:any) => {
+        if (response[0] == false) {
+          this.$emit(
+            "exibir-modal",
+            false,
+            "Não foi possível acessar o usuário!",
+            response[1]
+          );
+        } else {
+          this.$emit("atualizar-pagina", "home");
+          this.$emit(
+            "exibir-modal",
+            true,
+            "Acesso concebido!",
+            "Parabéns, você tem acesso em sua conta"
+          );
+          this.$emit("exibir-loading", false);
+        }
+      })
+      .finally(() => {
+        this.$emit("exibir-loading", false);
+      });
   }
 }
 </script>
@@ -250,9 +243,6 @@ p.title {
 }
 
 @media (max-width: 1500px) {
-
-
-
   section.login div.loginForms button {
     font-size: 25px;
   }

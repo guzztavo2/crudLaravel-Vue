@@ -44,8 +44,8 @@
 
 <script lang="ts">
 import { Vue, Options } from "vue-class-component";
-import verificarConta from "./Elements/verificarUsuario.vue";
-import User from "./User";
+import verificarConta from "../components/Elements/verificarUsuario.vue";
+import User from "../components/User";
 @Options({
   components: { verificarConta },
 })

@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import User from "./User";
+import User from "../components/User";
 @Options({
   emits: [
     "atualizar-pagina",
@@ -44,6 +44,7 @@ import User from "./User";
   ],
   components: {},
   props: {},
+  
   mounted() {
     this.carregarNomeUsuario();
   },

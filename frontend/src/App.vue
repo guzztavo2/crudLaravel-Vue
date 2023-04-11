@@ -13,11 +13,11 @@
       <h3 v-html="messageModal"></h3>
     </template>
   </modalApp>
-  <headerApp
+  <HeaderApp
     :currentPage="currentPage"
     @atualizar-pagina="atualizarPagina"
     @exibir-modal="dispararModal"
-  ></headerApp>
+  ></HeaderApp>
   <component
     :is="currentPage"
     @exibir-loading="exibirLoading"
@@ -29,18 +29,19 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import Home from "./components/Home.vue";
-import Registro from "./components/Registro.vue";
-import Login from "./components/Login.vue";
-import headerApp from "./components/Elements/header.vue";
-import footerApp from "./components/Elements/footer.vue";
-import ModalApp from "./components/Elements/modal.vue";
-import PainelApp from "./components/Painel.vue";
-import trocarSenha from "./components/trocarSenha.vue";
+import Home from "./Pages/Home.vue";
+import Registro from "./Pages/Registro.vue";
+import Login from "./Pages/Login.vue";
+import Crud from "./Pages/Crud.vue";
+import PainelApp from "./Pages/Painel.vue";
+import trocarSenha from "./Pages/trocarSenha.vue";
 import User from "./components/User";
-import crud from "./components/Crud.vue";
-import trocarNomeUsuario from "./components/trocarNomeUsuario.vue";
+import HeaderApp from "./components/Elements/header.vue";
+import footerApp from "./components/Elements/footer.vue";
+import trocarNomeUsuario from "./Pages/trocarNomeUsuario.vue";
 import loadingComp from "./components/Elements/loading.vue";
+import ModalApp from "./components/Elements/modal.vue";
+
 interface AppData {
   currentPage: string;
 }
@@ -58,7 +59,7 @@ interface modalProps {
 }
 @Options({
   components: {
-    headerApp,
+    HeaderApp,
     footerApp,
     Home,
     Registro,
@@ -67,34 +68,27 @@ interface modalProps {
     trocarSenha,
     PainelApp,
     trocarNomeUsuario,
-    crud,
+    Crud,
     loadingComp,
   },
   methods: {},
-  updated() {
-    this.verificarUsuario();
-  },
   created() {
     this.verificarUsuario();
-  },
-  mounted() {
-    this.verificarUsuario();
+
+    setInterval(()=>{
+      this.verificarUsuario();
+    },60000);
   },
 })
 export default class App extends Vue implements AppData, modalProps {
-  // *** Props para abrir e definir o Estilo do Modal ***
   titleModal = "";
   messageModal = "";
   typeModal = true;
   openModal = false;
-  // *****
-  // Props abrir a página de carregamento da aplicação
   openLoading = false;
-
   exibirLoading(valor:boolean){
     this.openLoading = valor;
   }
-  // ******
   publicPages = ["home", "registro", "login"];
   dispararModal(
     typeModal: boolean,
@@ -104,7 +98,7 @@ export default class App extends Vue implements AppData, modalProps {
     this.openModal = true;
     this.$nextTick(() => {
       this.typeModal = typeModal;
-      const modal: any = this.$refs.modal;
+      const modal:any = this.$refs.modal;
       this.titleModal = titleModal;
       this.messageModal = messageModal;
 
@@ -135,16 +129,15 @@ export default class App extends Vue implements AppData, modalProps {
   }
   async verificarUsuario() {
     const response = await User.verificarUsuario();
-
-    if (response !== null && response == false) {
+    if (response == null || response == false) {
       this.dispararModal(
         false,
         "Ops, falha de navegação!",
         "Verificamos que você não pode continuar acessando sua conta, pois pode haver uma instabilidade no servidor e/ou alguém de fora acessou sua conta. </br></br>Tente acessa-la novamente através da tela de login, caso você tenha sucesso, bem provável que outra pessoa já tem acesso a sua conta."
       );
       this.atualizarPagina("login");
+      this.exibirLoading(false);
     }
-    return;
   }
 }
 </script>

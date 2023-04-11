@@ -53,11 +53,9 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import headerApp from "./Elements/header.vue";
-import footerApp from "./Elements/footer.vue";
-import axios from "axios";
-import ModalApp from "./Elements/modal.vue";
-import User from "./User";
+import headerApp from "../components/Elements/header.vue";
+import footerApp from "../components/Elements/footer.vue";
+import User from "../components/User";
 
 @Options({
   emits: ["atualizar-pagina", "exibir-modal", "exibir-loading"],
@@ -71,7 +69,6 @@ import User from "./User";
   components: {
     headerApp,
     footerApp,
-    ModalApp,
   },
   props: {},
 
@@ -188,7 +185,7 @@ export default class Registro extends Vue {
     this.$emit("exibir-loading", true);
 
     User.registrarUsuario(this.nomeUsuario, this.senhaUsuario)
-      .then((response) => {
+      .then((response:any) => {
         inputOpacity("100%");
         if (response[0] == false) {
           this.$emit(

@@ -8,12 +8,7 @@ use Nette\Utils\Json;
 
 class informacaoController extends Controller
 {
-    public function login()
-    {
-    }
-    public function registro()
-    {
-    }
+
     private static function requestQuery(Request $request)
     {
         $onlyRequest = [
@@ -84,7 +79,7 @@ class informacaoController extends Controller
         if ($user == null)
             return response()->json(['erro' => 'O usuário não foi localizado, então não é possível editar essa informação.'], 404);
 
-        $informacao->atualizarInformacao($informacao, $user);
+        $informacao->atualizarInformacao($request->informacao, $user);
         return response()->json(['sucesso' => 'Informação salva com sucesso'], 200);
     }
     public function buscarInformacao($id)
@@ -94,15 +89,14 @@ class informacaoController extends Controller
             return response()->json(['erro' => 'Informação não foi localizada, provavelmente não existe ou já foi deletada!'], 404);
         return response()->json(['informacao' => $informacao, 'nomeUsuario' => $informacao->user->nomeUsuario], 200);
     }
-    private static function buscarId($id)
+    private static function buscarId($id): Informacao
     {
         $id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
         $informacao = Informacao::find($id);
         return $informacao;
     }
-    public function deletarInformacoes(Request $request)
+    public function deletarInformacoes(Request $request, Informacao $informacao)
     {
-
         $validate = validator(
             $request->all(),
             ["informacao" => 'required|array|min:1|max:10'],
@@ -113,9 +107,30 @@ class informacaoController extends Controller
                 'max' => 'O é preciso ter no máximo :max elementos.'
             ]
         );
+        if ($validate->fails()) {
+            return response()->json([
+                'erro' => $validate->errors()->all(),
+            ], 422);
+        }
+        foreach ($request->informacao as $item) {
+            if (!filter_var($item, FILTER_VALIDATE_INT)) {
+                return response()->json([
+                    'erro' => 'Apenas o ID de identificação deve ser enviado para deletar.',
+                ], 422);
+            }
+            $informacao = $informacao::find($item);
 
-
-        dd($validate);
+            if ($informacao == null) {
+                return response()->json([
+                    'erro' => 'A informação que você está querendo deletar, não existe ou foi modificada.',
+                ], 422);
+            }
+            $informacao->isDeleted = true;
+            $informacao->save();
+        }
+        return response()->json([
+            'sucesso' => 'Todas as informações foram deletadas com sucesso.'
+        ], 200);
     }
     public function deletarInformacao(Request $request, $id)
     {
@@ -125,5 +140,26 @@ class informacaoController extends Controller
         $informacao->isDeleted = true;
         $informacao->save();
         return response()->json(['sucesso' => 'Informação deletada com sucesso'], 200);
+    }
+    public function adicionarInformacao(Request $request, Informacao $informacao)
+    {
+
+        $validator = validator($request->all(), [
+            'informacao' => 'string|required|max:255|min:5'
+        ], [
+            'required' => 'A informação é necessária para atualizar a informação',
+            'string' => 'A informação a ser cadastrada tem que ser em caracteres para ser cadastrada.',
+            'min' => 'É preciso ter no minimo :min caracteres.',
+            'max' => 'O é preciso ter no máximo :max caracteres.'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'erro' => $validator->errors()->all(),
+            ], 422);
+        }
+            $informacao->gerarInformacao($request->informacao, $request->user());
+            return response()->json(['sucesso' => 'Informação salva com sucesso'], 200);
+
     }
 }

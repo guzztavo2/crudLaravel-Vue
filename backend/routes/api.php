@@ -30,11 +30,11 @@ Route::controller(userController::class)->middleware(['auth:sanctum', HandleCors
     Route::post('/trocarSenha', 'trocarSenha');
     Route::post('/trocarNomeUsuario', 'trocarNomeUsuario');
 });
-Route::controller(informacaoController::class)->middleware([HandleCors::class])->group(function () {
+Route::controller(informacaoController::class)->middleware([HandleCors::class,'auth:sanctum'])->group(function () {
     Route::get('/informacao', 'informacao');
     Route::get('/informacao/{id}', 'buscarInformacao');
     Route::delete('/informacao/{id}', 'deletarInformacao');
     Route::delete('/informacao', 'deletarInformacoes');
-
+    Route::post('/informacao', 'adicionarInformacao');
     Route::put('/editarInformacao/{id}', 'editarInformacao');
 });

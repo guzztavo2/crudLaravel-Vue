@@ -51,8 +51,9 @@
 
 <script lang="ts">
 import { Vue, Options } from "vue-class-component";
-import User from "./User";
-import verificarConta from "./Elements/verificarUsuario.vue";
+import User from "../components/User";
+import verificarConta from "../components/Elements/verificarUsuario.vue";
+
 @Options({
   emits: ["atualizar-pagina", "exibir-modal"],
   // data() {
@@ -77,6 +78,7 @@ export default class trocarSenha extends Vue {
   novaSenha = "";
   repetirNovaSenha = "";
   verificarUser(item:any){
+    
    this.verificacao = item;
   }
   verificarNovaSenha() {

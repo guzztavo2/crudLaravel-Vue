@@ -1,57 +1,31 @@
 <template>
-  <dialogModal
-    v-if="openModal"
-    :typeModal="typeModal"
-    @exibir-loading="exibirLoading"
-    @resposta-modal="respostaModal"
-    @exibir-modal="dispararModal"
-  >
+  <dialogModal v-if="openModal" :typeModal="typeModal" @exibir-loading="exibirLoading" @resposta-modal="respostaModal"
+    @exibir-modal="dispararModal">
   </dialogModal>
   <section class="crud">
     <div class="container">
       <h1>Gerenciar Informações</h1>
       <div class="buttons">
-        <button
-          @click="adicionarInformacao"
-          v-if="selecaoAtivada == false"
-          class="adicionar"
-        >
+        <button @click="adicionarInformacao" v-if="selecaoAtivada == false" class="adicionar">
           Adicionar Informação <i class="fa-solid fa-plus"></i>
         </button>
-        <button
-          class="selecionar"
-          @click="alterarSelecao"
-          v-if="selecaoAtivada == false"
-        >
+        <button class="selecionar" @click="alterarSelecao" v-if="selecaoAtivada == false">
           Selecionar itens <i class="fa-regular fa-square-check"></i>
         </button>
-        <button
-          class="remover"
-          v-if="selecaoAtivada && listInformacoes.length > 0"
-        >
-          Remover Informação <i class="fa-solid fa-minus"></i>
+        <button class="remover" v-if="selecaoAtivada && listInformacoes.length > 0" @click="removerVariasInformacoes">
+          Remover Informações <i class="fa-solid fa-minus"></i>
         </button>
-        <button
-          class="selecionar"
-          @click="alterarSelecao"
-          v-if="selecaoAtivada == true"
-        >
+        <button class="selecionar" @click="alterarSelecao" v-if="selecaoAtivada == true">
           Cancelar seleção <i class="fa-regular fa-square-check"></i>
         </button>
 
-        <label for="buscarInfo"
-          ><p>Buscar Informações</p>
-          <input
-            v-model="buscarInfo"
-            @keypress="inputEnterPressionado"
-            type="text"
-            name=""
-            id="buscarInfo"
-          />
+        <label for="buscarInfo" v-if="listInformacoes.length > 0">
+          <p>Buscar Informações</p>
+          <input v-model="buscarInfo" @keypress="inputEnterPressionado" type="text" name="" id="buscarInfo" />
         </label>
       </div>
       <div class="table_wrapper">
-        <table v-if="selecaoAtivada === true" ref="table">
+        <table v-if="selecaoAtivada === true" id="table">
           <tr v-if="listInformacoes.length > 0" class="head">
             <th>
               <p>Selecionar</p>
@@ -76,7 +50,7 @@
             <h2>Não há informações cadastradas</h2>
           </tr>
         </table>
-        <table v-if="selecaoAtivada === false" ref="table">
+        <table v-if="selecaoAtivada === false" id="table">
           <tr v-if="listInformacoes.length > 0" class="head">
             <th>
               <p>ID</p>
@@ -102,27 +76,28 @@
           </tr>
         </table>
       </div>
-      <div
-        v-if="listInformacoes.length > 0"
-        ref="paginacao"
-        class="flexRow paginacao"
-      ></div>
+      <div v-if="listInformacoes.length > 0" id="paginacao" class="flexRow paginacao"></div>
     </div>
   </section>
 </template>
 
 <script lang="ts">
-import { Vue, Options } from "vue-class-component";
-import Informacao from "./Informacao";
-import dialogModal from "./Elements/dialogModal.vue";
-import infoData from "./infoData";
+import { Options, Vue } from 'vue-class-component';
+import Informacao from "../components/Informacao";
+import dialogModal from "../components/Elements/dialogModal.vue";
+import infoData from "../components/Model/infoData";
+
 @Options({
   async mounted() {
+
     await this.getInformacoes();
+    //this.adicionarInformacao();
+
   },
   components: { dialogModal },
 
-  emits: ["exibir-modal", "exibir-loading", "atualizarPagina"],
+  emits: ['exibir-loading', 'exibir-modal', 'atualizar-pagina'],
+
 })
 export default class crud extends Vue {
   selecaoAtivada = false;
@@ -143,7 +118,6 @@ export default class crud extends Vue {
     }
   }
   dispararModal(typeModal: boolean, titleModal: string, messageModal: string) {
-    console.log(messageModal);
     this.$emit("exibir-modal", typeModal, titleModal, messageModal);
   }
   orderByEvent() {
@@ -174,7 +148,7 @@ export default class crud extends Vue {
     this.$emit("exibir-loading", valor);
   }
   async getInformacoes() {
-    this.$emit("exibir-loading", true);
+    this.exibirLoading(true);
     await Informacao.getInformacoesList(
       this.currentPage,
       this.resquestOrder,
@@ -190,13 +164,15 @@ export default class crud extends Vue {
         }
       })
       .finally(() => {
-        this.insertInformacoes();
-        this.adicionarPaginacao();
-        this.$emit("exibir-loading", false);
+        if (document.querySelector("#table") !== null) {
+          this.insertInformacoes();
+          this.adicionarPaginacao();
+        }
+        this.exibirLoading(false);
       });
   }
   insertInformacoes() {
-    const table = this.$refs.table as HTMLElement;
+    const table = document.querySelector("#table") as HTMLElement;
     const selecao = this.selecaoAtivada;
     if (selecao) {
       table.innerHTML = `<tr v-if="listInformacoes.length > 0" class="head">
@@ -211,7 +187,7 @@ export default class crud extends Vue {
         table.innerHTML += `<tr identificador="${item.id}" id="informacaoRow">
           <td> <p><input type="checkbox" id="${item.id}" /></p></td>
             <td><p>${item.id}</p></td>
-            <td><p>${item.informacao.substring(0, 25)}...</p></td>
+            <td><p>${item.informacao.substring(0, 15)}...</p></td>
             <td><p>${item.criadoQuando}</p></td>
             <td><p>${item.atualizadoQuando}</p></td>
             <td><p>${item.nomeUsuario}</p></td>
@@ -229,7 +205,7 @@ export default class crud extends Vue {
       this.listInformacoes.forEach((item: any) => {
         table.innerHTML += `<tr identificador="${item.id}" id="informacaoRow">
           <td><p>${item.id}</p></td>
-            <td><p>${item.informacao.substring(0, 25)}...</p></td>
+            <td><p>${item.informacao.substring(0, 15)}...</p></td>
             <td><p>${item.criadoQuando}</p></td>
             <td><p>${item.atualizadoQuando}</p></td>
             <td><p>${item.nomeUsuario}</p></td>
@@ -246,7 +222,6 @@ export default class crud extends Vue {
           </tr>`;
       });
     }
-
     this.orderByEvent();
     this.crudEvents();
   }
@@ -285,7 +260,9 @@ export default class crud extends Vue {
       });
     } else {
       rowInformacoes((item: any) => {
-        item.addEventListener("click", () => {
+        item.addEventListener("click", (event: Event) => {
+          if ((event.target! as HTMLInputElement).nodeName == "INPUT") return;
+
           const checkbox = item.querySelector('input[type="checkbox"]');
           if (checkbox.checked == true) checkbox.checked = false;
           else checkbox.checked = true;
@@ -294,7 +271,7 @@ export default class crud extends Vue {
     }
   }
   adicionarPaginacao() {
-    const paginacao = this.$refs.paginacao as HTMLElement,
+    const paginacao = document.getElementById("paginacao"),
       currentEvent = this.setCurrentPage,
       currentPage = this.currentPage,
       paginaAnterior = () => {
@@ -318,10 +295,12 @@ export default class crud extends Vue {
         });
       };
 
-    this.paginacaoInHTML(paginacao);
-    paginaAnterior();
-    proximaPagina();
-    paginaEvent();
+    if (paginacao !== null) {
+      this.paginacaoInHTML(paginacao as HTMLElement);
+      paginaAnterior();
+      proximaPagina();
+      paginaEvent();
+    }
   }
   paginacaoInHTML(paginacao: HTMLElement) {
     paginacao.innerHTML = "";
@@ -347,8 +326,23 @@ export default class crud extends Vue {
     this.currentPage = page;
     this.getInformacoes();
   }
+  async removerVariasInformacoes() {
+    if (!this.selecaoAtivada) return;
+
+    const informacoesSelecionadas = document.querySelectorAll(
+      'input[type="checkbox"]:checked'
+    );
+    const informacoes: Array<number> = [];
+    informacoesSelecionadas.forEach((elemento) => {
+      informacoes.push(Number.parseInt(elemento.getAttribute("id") as string));
+    });
+    await Informacao.removerInformacoes(informacoes).then((result) => {
+      if (result[0] == true) this.getInformacoes();
+    });
+  }
   adicionarInformacao() {
-    alert("a");
+    this.typeModal = ["adicionar"];
+    this.openModal = true;
   }
 }
 </script>
@@ -357,6 +351,7 @@ export default class crud extends Vue {
 .dNone {
   display: none !important;
 }
+
 label[for="buscarInfo"] {
   width: 100%;
   border: 1px solid rgba(0, 0, 0, 0.445);
@@ -367,10 +362,12 @@ label[for="buscarInfo"] {
   align-items: left;
   justify-content: center;
 }
+
 label[for="buscarInfo"] input {
   border: 1px solid rgba(0, 0, 0, 0.445);
   width: 100%;
 }
+
 section.crud div.paginacao {
   padding: 1%;
   justify-content: center;
@@ -418,9 +415,10 @@ section.crud table td p.flexRow i {
   position: relative;
 }
 
-section.crud table td p.flexRow i > span {
+section.crud table td p.flexRow i>span {
   position: absolute;
   top: -40px;
+  left: -10px;
   z-index: 2;
   display: none;
 
@@ -432,7 +430,7 @@ section.crud table td p.flexRow i > span {
   padding: 4%;
 }
 
-section.crud table td p.flexRow i:hover > span {
+section.crud table td p.flexRow i:hover>span {
   display: block;
 }
 
@@ -513,14 +511,14 @@ section.crud {
   height: 90%;
 }
 
-section.crud > div.container {
+section.crud>div.container {
   width: 100%;
   height: 100%;
   padding: 0 1%;
   overflow: auto;
 }
 
-section.crud > div.container > h1 {
+section.crud>div.container>h1 {
   font-weight: 900;
   text-transform: uppercase;
   padding: 1%;
@@ -579,7 +577,7 @@ section.crud div.buttons button.selecionar {
     font-size: 20px;
   }
 
-  section.crud table td p.flexRow i > span {
+  section.crud table td p.flexRow i>span {
     top: -30px;
     left: -10px;
     font-size: 16px;

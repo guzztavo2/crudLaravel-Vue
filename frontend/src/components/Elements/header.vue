@@ -185,7 +185,7 @@ export default class HeaderApp
     mobileElement?.classList.remove("slide-out-top");
   };
 
-  mobileClick(event: Event) {
+  mobileClick() {
     if (this.visible === true) {
       this.invisibleFunc();
       this.visible = false;

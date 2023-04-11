@@ -56,7 +56,7 @@ export default class ModalApp extends Vue {
 
   typeModal!: boolean;
 
-  exibirModal(event: Event) {
+  exibirModal() {
     this.modalClassOpenClose = "slide-in-top-Message";
   }
 

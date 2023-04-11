@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Informacao extends Model
 {
     use HasFactory;
-    protected $fillable = ['informacao', 'isDeleted'];
+    protected $fillable = ['informacao', 'isDeleted', 'user_id'];
     protected $table = 'tb_informacao';
 
     public function user(){
@@ -18,15 +18,15 @@ class Informacao extends Model
         $info = new Informacao();
         $info->setInformacao($informacao);
         $info->setIsDeleted(false);
-        $info->user()->save($user);
-        //$user->informacao()->save($info);
+        $user->informacao()->save($info);
     }
     public function atualizarInformacao(string $novaInformacao, User $user){
         if($this->getIsDeleted()){
             return false;
         }
         $this->setinformacao($novaInformacao);
-        $this->user()->save($user);
+        $this->user_id = $user->id;
+        $this->save();
     }
 
     public function getIsDeleted():bool{
