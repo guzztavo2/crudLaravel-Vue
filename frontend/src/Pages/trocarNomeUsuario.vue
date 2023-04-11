@@ -2,7 +2,7 @@
   <section class="trocarNomeUsuario">
     <div class="container">
       <h1>Trocar nome usuário</h1>
-      <verificarConta @verificar="verificarUser"> </verificarConta>
+      <verificarConta @exibir-loading="exibirLoading" @verificar="verificarUser"> </verificarConta>
       <div v-if="verificacao == false" class="confirmarSenha"></div>
       <div v-if="verificacao == false" class="confirmarSenha">
         <label for="nomeUsuario"
@@ -48,6 +48,7 @@ import verificarConta from "../components/Elements/verificarUsuario.vue";
 import User from "../components/User";
 @Options({
   components: { verificarConta },
+  emits:['exibir-loading']
 })
 export default class trocarNomeUsuario extends Vue {
   verificacao = true;
@@ -69,7 +70,10 @@ export default class trocarNomeUsuario extends Vue {
           "A confirmação precisa ser igual ao do campo acima.";
         return;
       }
-      const response = await User.verificarNomeUsuario(this.nomeUsuario);
+      this.exibirLoading(true);
+      const response = await User.verificarNomeUsuario(this.nomeUsuario).finally(()=>{
+        this.exibirLoading(false);
+      });
       if (response[0] == "false") {
         this.erroNomeUsuario = response[1];
         return;
@@ -77,10 +81,16 @@ export default class trocarNomeUsuario extends Vue {
       this.erroNomeUsuario = "";
     }
   }
+  exibirLoading(response:boolean){
+    this.$emit('exibir-loading', response);
+  }
   async actionTrocaNomeUsuario() {
     this.validarNomeUsuario();
     if(this.erroNomeUsuario.length == 0 && this.erroNomeUsuario2.length == 0){
-      const response = await User.trocarNomeUsuario(this.nomeUsuario, this.nomeUsuario2);
+      this.exibirLoading(true);
+      const response = await User.trocarNomeUsuario(this.nomeUsuario, this.nomeUsuario2).finally(()=>{
+        this.exibirLoading(false);
+      })
       if(response[0] == 'false'){
         this.$emit('exibir-modal', false, 'Erro!', response[1]);
         return;

@@ -86,6 +86,8 @@ export default class App extends Vue implements AppData, modalProps {
   typeModal = true;
   openModal = false;
   openLoading = false;
+  currentPage = "home";
+
   exibirLoading(valor:boolean){
     this.openLoading = valor;
   }
@@ -109,7 +111,6 @@ export default class App extends Vue implements AppData, modalProps {
   fecharModal() {
     this.openModal = false;
   }
-  currentPage = "crud";
   atualizarPagina(novaPagina: string) {
     if (User.verificarLogado() == false) {
       if (this.publicPages.includes(novaPagina)) {
@@ -129,7 +130,7 @@ export default class App extends Vue implements AppData, modalProps {
   }
   async verificarUsuario() {
     const response = await User.verificarUsuario();
-    if (response == null || response == false) {
+    if (response !== null && response == false) {
       this.dispararModal(
         false,
         "Ops, falha de navegação!",

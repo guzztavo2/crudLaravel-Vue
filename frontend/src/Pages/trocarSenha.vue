@@ -2,7 +2,7 @@
   <section class="trocarSenha">
     <div class="container">
       <h1>Trocar senha</h1>
-      <verificarConta @verificar="verificarUser" >
+      <verificarConta @exibir-loading="exibirLoading" @verificar="verificarUser" >
       </verificarConta>
       <div v-if="verificacao == false" class="confirmarSenha">
         <label for="senhaAntiga"
@@ -55,7 +55,7 @@ import User from "../components/User";
 import verificarConta from "../components/Elements/verificarUsuario.vue";
 
 @Options({
-  emits: ["atualizar-pagina", "exibir-modal"],
+  emits: ["atualizar-pagina","exibir-loading", "exibir-modal"],
   // data() {
 
   // },
@@ -84,7 +84,9 @@ export default class trocarSenha extends Vue {
   verificarNovaSenha() {
     this.erro = User.verificarSenha(this.novaSenha);
   }
-
+  exibirLoading(response:boolean){
+    this.$emit('exibir-loading',response);
+  }
   verificarSenha(senha:string){
     return User.verificarSenha(senha);
   }
@@ -103,7 +105,7 @@ export default class trocarSenha extends Vue {
       }, 3000);
       return;
     }
-
+    this.exibirLoading(true);
     const resultado = await User.trocarSenha(this.senhaAtual, this.novaSenha, this.repetirNovaSenha)
     if(resultado[0]){
       this.$emit('exibir-modal', true, 'Sucesso!', 'Senha alterada com sucesso, na próxima vez que for acessar sua conta, utilize a nova senha.');
@@ -111,6 +113,7 @@ export default class trocarSenha extends Vue {
     }else{
       this.$emit('exibir-modal', false, 'Falha!', resultado[1]);
     }
+    this.exibirLoading(false);
   }
 }
 </script>

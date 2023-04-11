@@ -205,7 +205,7 @@ export default class HeaderApp
   verificaLogado(): boolean {
     return User.verificarLogado();
   }
-  async logout() {
+  async logout() {    
     await User.logout();
     this.atualizarPagina("home");
     this.estaLogado = false;

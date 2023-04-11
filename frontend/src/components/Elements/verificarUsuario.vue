@@ -23,27 +23,30 @@ import User from "../User";
 @Options({
   components: {},
   methods: {},
-  emits: ["verificar"],
+  emits: ["verificar" ,"exibir-loading"],
 })
 export default class verificarConta extends Vue {
-  senha = "gututeleS2010@";
+  senha = "";
   erroSenha = "";
   exibir = true;
 
   verificaoAction(value: boolean) {
     this.exibir = value;
   }
-  verificarSenhaAction() {
+  async verificarSenhaAction() {
     this.erroSenha = User.verificarSenha(this.senha);
-
-    User.verificarSenhaUsuario(this.senha).then((result) => {
-      if (result == true) {
+    this.$emit('exibir-loading', true);
+    await User.verificarSenhaUsuario(this.senha).then((result) => {
+      if (result[0] == true) {
         this.exibir = false;
         this.$emit("verificar", this.exibir);
-      } else if (result !== undefined) {
-        this.erroSenha = result;
+      } else{
+        this.erroSenha = result[1];
       }
-    });
+    }).finally(()=>{
+      this.$emit('exibir-loading', false);
+
+    })
   }
 }
 </script>

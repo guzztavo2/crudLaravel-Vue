@@ -14,13 +14,13 @@ export default class User {
     return responseData;
   }
   static async verificarSenhaUsuario(senhaAntiga: string) {
-    let responseData;
+    const responseData:any = [];
     //await this.csfrCookie();
     await AxiosInstance.post("/verificarSenha", {
       senhaUsuario: senhaAntiga,
     })
       .then(() => {
-        responseData = true;
+        responseData.push(true);
       })
       .catch((error) => {
         if (error.response !== undefined)
