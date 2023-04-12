@@ -8,6 +8,9 @@
     <li>VueJS 3</li>
     <li>Laravel Sanctum</li>
     <li>Axios</li>
+    <li>TypeScript</li>
+    <li>CSS</li>
+    <li>FontAwesome</li>
 </ul>
 <h2>Configuração do ambiente</h2>
 <p>Para executar o projeto localmente, siga os seguintes passos:</p>
@@ -118,3 +121,6 @@
 <h2>Já no VueJS temos o mesmo roteamento:</h2>
 <p>Embora esteja usando rotas no VueJS, optei por não instalar o roteamento padrão do VueJS e criei minha própria
     implementação de roteamento utilizando eventos personalizados, como parte de meu processo de estudo e teste.</p>
+
+<h2>Design responsivo para todas as telas</h2>
+<p>Eu criei todo o design do site e utilizei o FontAwesome para torná-lo mais atraente, bem como o Colors.Co para harmonizar as cores. Além disso, utilizei CSS para garantir que o site seja totalmente responsivo e funcione em todas as telas.</p>
